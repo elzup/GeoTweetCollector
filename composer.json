@@ -1,0 +1,13 @@
+{
+    "name": "root/tweetcollecter",
+    "authors": [
+        {
+            "name": "elzzup",
+            "email": "guild0105@gmail.com"
+        }
+    ],
+    "require": {
+        "slim/slim": "2.*",
+        "mpyw/twistoauth": "@dev"
+    }
+}
