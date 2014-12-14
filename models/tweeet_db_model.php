@@ -1,6 +1,6 @@
 <?php
 
-class TweetDBModel {
+class TweetDBModel extends PDO {
     public function __construct() {
         $this->engine = DB_ENGINE;
         $this->host = DB_HOST;
@@ -11,19 +11,21 @@ class TweetDBModel {
         parent::__construct($dns, $this->user, $this->pass);
     }
 
-    private function insert_tweets($tweets) {
-        $sql = $this->prepare('INSERT INTO ' . DB_TN_TWEETS . ' (' . DB_CN_TWEETS_TWEET_ID . ', ' . DB_CN_TWEETS_TEXT . ', ' . DB_CN_TWEETS_LATLNG . ') VALUES ');
+    public function insert_tweets($statuses) {
+        $sql = 'INSERT INTO `' . DB_TN_TWEETS . '` (`' . DB_CN_TWEETS_TWEET_ID . '`, `' . DB_CN_TWEETS_TWEET_USER_ID . '`, `' . DB_CN_TWEETS_TEXT . '`, `' . DB_CN_TWEETS_LATLNG . '`) VALUES ';
         $sql_values = array();
-        foreach (range(1, count($tweets)) as $i) {
-            $sql_values[] = "(:TID$i, :TEXT$i, :POS$i)";
+        foreach (range(1, count($statuses)) as $i) {
+            $sql_values[] = "(:TID$i, :TUID$i, ':TEXT$i', GeomFromText('POINT(:LAT$i :LON$i)'))";
         }
         $sql .= implode(',', $sql_values);
         $stmt = $this->prepare($sql);
-        foreach ($words as $i => $word) {
+        foreach ($statuses as $i => $st) {
             $i++;
-            $stmt->bindValue(":WORD$i", $word->word);
-            $stmt->bindValue(":TID$i", $word->twitter_id);
-            $stmt->bindValue(":TS$i", date(MYSQL_TIMESTAMP, $word->timestamp));
+            $stmt->bindValue(":TID$i", $st->id);
+            $stmt->bindValue(":TUID$i", $st->user->id);
+            $stmt->bindValue(":TEXT$i", $st->text);
+            $stmt->bindValue(":LAT$i", $st->geo->coordinates[0]);
+            $stmt->bindValue(":LON$i", $st->geo->coordinates[1]);
         }
         return $stmt->execute();
     }

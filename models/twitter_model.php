@@ -4,6 +4,10 @@ class TwitterModel {
     /** @var TwistOAuth */
     public $to;
 
+    // 前回のリクエストを参照するため
+    public $url;
+    public $params;
+
     public function __construct() {
         $tokens = unserialize(AP_TWITTER_TOKENS);
         $token = $tokens[0];
@@ -15,12 +19,34 @@ class TwitterModel {
     }
 
     public function getGeoTweets(Rule $rule) {
-        $params = array(
+        $this->params = array(
             'q' => '',
             'geocode' => $rule->getGeocode(),
             'until' => $rule->date_text,
-            'count' => 100,
+            'count' => 2,
+            'result_type' => 'recent',
         );
-        return $this->to->get('search/tweets', $params);
+        $this->url = $this->last_url = 'search/tweets';
+        return $this->to->get($this->url, $this->params);
+    }
+
+    public function continueRequest($update_params) {
+        if (!isset($this->url)) {
+            return NULL;
+        }
+        $this->params = array_merge($this->params, $update_params);
+        return $this->to->get($this->url, $this->params);
+    }
+
+    public static function get_min_id($statuses) {
+        $min = NULL;
+        foreach ($statuses as $st) {
+            if (!isset($min)) {
+                $min = $st->id;
+                continue;
+            }
+            $min = min($min, $st->id);
+        }
+        return $min;
     }
 }
