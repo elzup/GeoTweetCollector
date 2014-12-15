@@ -35,6 +35,7 @@ class TwitterModel {
             return NULL;
         }
         $this->params = array_merge($this->params, $update_params);
+//        var_dump($this->params);
         return $this->to->get($this->url, $this->params);
     }
 

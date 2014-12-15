@@ -15,15 +15,14 @@ class JobController {
         $statuses = $res->statuses;
         $min_id = TwitterModel::get_min_id($res->statuses);
         $params = array(
-            'max_id', $min_id,
+            'max_id' => $min_id - 1,
         );
-//        $res = $tm->continueRequest($params);
-//        $statuses = array_merge($statuses, $res->statuses);
-//        $statuses += $res->statuses;
-//        echo count($statuses);
+        $res = $tm->continueRequest($params);
+        $statuses = array_merge($statuses, $res->statuses);
+        echo PHP_EOL;
+        echo count($statuses);
         $dao->insert_tweets($statuses);
     }
-
 
     public function testCollectGeo() {
         echo '<pre>';
@@ -35,6 +34,5 @@ class JobController {
         $r->date_text = '2014-12-13';
         var_dump($tweets);
         $tweets = $tm->getGeoTweets($r);
-
     }
 }

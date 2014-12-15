@@ -10,4 +10,7 @@ define('DB_CN_TWEETS_TWEET_USER_ID', 'tweet_user_id');
 define('DB_CN_TWEETS_TEXT', 'text');
 define('DB_CN_TWEETS_LATLNG', 'latlng');
 
+define('DB_CN_TWEETS_GEO_LAT', 'geo_lat');
+define('DB_CN_TWEETS_GEO_LON', 'geo_lon');
+
 //GeomFromText('POINT(139.766084 35.681382)')
