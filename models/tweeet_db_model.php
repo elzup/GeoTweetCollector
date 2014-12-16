@@ -17,13 +17,26 @@ class TweetDBModel extends PDO {
         }
     }
 
-    public function insert_tweets($statuses) {
-        $sql = 'INSERT INTO `' . DB_TN_TWEETS . '` (`' . DB_CN_TWEETS_TWEET_ID . '`, `' . DB_CN_TWEETS_TWEET_USER_ID . '`, `' . DB_CN_TWEETS_TEXT . '`, `' . DB_CN_TWEETS_GEO_LAT . '`, `' . DB_CN_TWEETS_GEO_LON . '`) VALUES ';
-//        $sql = 'INSERT INTO `' . DB_TN_TWEETS . '` (`' . DB_CN_TWEETS_TWEET_ID . '`, `' . DB_CN_TWEETS_TWEET_USER_ID . '`, `' . DB_CN_TWEETS_TEXT . '`) VALUES ';
+    public function load_rule($id) {
+        $res = $this->select_rule($id);
+        return new Rule($res);
+    }
+
+    public function select_rule($id) {
+        $sql = 'SELECT * FROM `' . DB_TN_RULES . '` WHERE `' . DB_CN_RULES_ID . '` = :ID';
+        $stmt = $this->prepare($sql);
+        $stmt->bindValue(":ID", $id);
+        $stmt->execute();
+        return $stmt->fetch();
+    }
+
+
+    public function insert_tweets($statuses, $rule_id) {
+        $sql = 'INSERT INTO `' . DB_TN_TWEETS . '` (`' . DB_CN_TWEETS_TWEET_ID . '`, `' . DB_CN_TWEETS_TWEET_USER_ID . '`, `' . DB_CN_TWEETS_TEXT . '`, `' . DB_CN_TWEETS_GEO_LAT . '`, `' . DB_CN_TWEETS_GEO_LON . '`, `' . DB_CN_TWEETS_RULES_ID .'`) VALUES ';
         $sql_values = array();
         foreach (range(1, count($statuses)) as $i) {
 //            $sql_values[] = "(':TID$i', ':TUID$i', ':TEXT$i')";
-            $sql_values[] = "(':TID{$i}E', ':TUID{$i}E', ':TEXT{$i}E', ':LAT{$i}E', ':LON{$i}E')";
+            $sql_values[] = "(':TID{$i}E', ':TUID{$i}E', ':TEXT{$i}E', ':LAT{$i}E', ':LON{$i}E', :RID{$i}E)";
         }
         $sql .= implode(',', $sql_values);
 
@@ -37,10 +50,22 @@ class TweetDBModel extends PDO {
             $stmt->bindValue(":TEXT{$i}E", $st->text);
             $stmt->bindValue(":LAT{$i}E", $st->geo->coordinates[0]);
             $stmt->bindValue(":LON{$i}E", $st->geo->coordinates[1]);
+            $stmt->bindValue(":RID{$i}E", $rule_id);
             $pre_sql = str_replace(array(":TID{$i}E", ":TUID{$i}E", ":TEXT{$i}E", ":LAT{$i}E", ":LON{$i}E"), array($st->id, $st->user->id, $st->text, $st->geo->coordinates[0], $st->geo->coordinates[1]), $pre_sql);
         }
-        echo $sql . PHP_EOL;
-        echo $pre_sql;
+//        echo $sql . PHP_EOL;
+//        echo $pre_sql;
+        return $stmt->execute();
+    }
+
+    public function insert_rule(Rule $rule) {
+        $sql = 'INSERT INTO `' . DB_TN_RULES . '` (`' . DB_CN_RULES_LABEL . '`, `' . DB_CN_RULES_DATE . '`, `' . DB_CN_RULES_LAT . '`, `' . DB_CN_RULES_LON . '`, `' . DB_CN_RULES_RADIUS_KM . '`) VALUES (:LABEL, :DATE, :LAT, :LON, :RAD)';
+        $stmt = $this->prepare($sql);
+        $stmt->bindValue(':LABEL', $rule->label);
+        $stmt->bindValue(':DATE', $rule->getDateMysql());
+        $stmt->bindValue(':LAT', $rule->lat);
+        $stmt->bindValue(':LON', $rule->lon);
+        $stmt->bindValue(':RAD', $rule->radius);
         return $stmt->execute();
     }
 }

@@ -1,9 +1,14 @@
 # includes
 composer.lock
 /vendor/
+/node_modules/
+/bower_components/
 
 # secret
 keys.php
 .htaccess
 php.ini
 
+# compiled
+*.css
+*.js

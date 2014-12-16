@@ -18,12 +18,15 @@ class TwitterModel {
         }
     }
 
+    public function getGeo(Rule $rule) {
+    }
+
     public function getGeoTweets(Rule $rule) {
         $this->params = array(
             'q' => '',
             'geocode' => $rule->getGeocode(),
             'until' => $rule->date_text,
-            'count' => 2,
+            'count' => 100,
             'result_type' => 'recent',
         );
         $this->url = $this->last_url = 'search/tweets';

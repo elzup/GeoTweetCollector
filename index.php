@@ -24,6 +24,10 @@ $app = new \Slim\Slim(array(
 
 // Web views
 $app->get('/', '\PageController:showIndex');
-$app->get('/job', '\JobController:collectGeo');
+$app->post('/job/submit',  '\JobController:submit');
+$app->get('/job/geo/:id', function($id) {
+    $jc = new \JobController();
+    $jc->collectGeo($id);
+});
 
 $app->run();

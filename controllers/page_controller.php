@@ -2,6 +2,6 @@
 
 class PageController {
     public function showIndex() {
-        echo 'yahello';
+        require('./views/toppage.php');
     }
 }
