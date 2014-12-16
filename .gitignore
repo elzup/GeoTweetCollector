@@ -11,4 +11,5 @@ php.ini
 
 # compiled
 *.css
+*.map
 *.js
