@@ -21,13 +21,14 @@ class TwitterModel {
     public function getGeo(Rule $rule) {
     }
 
-    public function getGeoTweets(Rule $rule) {
+    public function getGeoTweets(Rule $rule, $max_id) {
         $this->params = array(
             'q' => '',
             'geocode' => $rule->getGeocode(),
-            'until' => $rule->date_text,
+            'until' => $rule->getDateMysql(),
             'count' => 100,
             'result_type' => 'recent',
+            'max_id' => $max_id,
         );
         $this->url = $this->last_url = 'search/tweets';
         return $this->to->get($this->url, $this->params);

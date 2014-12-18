@@ -3,32 +3,28 @@
 class JobController {
 
     public function collectGeo($rule_id) {
-        $dao = new TweetDBModel();
-        $rule = $dao->load_rule($rule_id);
-        echo $rule->getDateMysql();
-        var_dump($rule);
-    }
-
-    public function registRule($lat, $lon, $rad) {
-        echo '<pre>';
         $tm = new TwitterModel();
         $dao = new TweetDBModel();
-        $r = new Rule();
-        $r->lat = $lat;
-        $r->lon = $lon;
-        $r->radius = $rad;
-        $r->date_text = 
-        $res = $tm->getGeoTweets($r);
+        $rule = $dao->load_rule($rule_id);
+
+        $min_id = $dao->get_old_id($rule_id);
+        $res = $tm->getGeoTweets($rule, $min_id);
         $statuses = $res->statuses;
-        $min_id = TwitterModel::get_min_id($res->statuses);
-        $params = array(
-            'max_id' => $min_id - 1,
-        );
-        $res = $tm->continueRequest($params);
-        $statuses = array_merge($statuses, $res->statuses);
+        for ($i = 0; $i < 15; $i++) {
+            $min_id = TwitterModel::get_min_id($res->statuses);
+            $params = array(
+                'max_id' => $min_id - 1,
+            );
+            $res = $tm->continueRequest($params);
+            $statuses = array_merge($statuses, $res->statuses);
+            var_dump($statuses);
+        }
         echo PHP_EOL;
         echo count($statuses);
-        $dao->insert_tweets($statuses);
+        if (!count($statuses)) {
+            return;
+        }
+        $dao->insert_tweets($statuses, $rule_id);
     }
 
     public function testCollectGeo() {

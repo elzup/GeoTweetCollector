@@ -21,6 +21,7 @@ define('DB_CN_RULES_DATE'      , 'date');
 define('DB_CN_RULES_LAT'       , 'lat');
 define('DB_CN_RULES_LON'       , 'lon');
 define('DB_CN_RULES_RADIUS_KM' , 'radius_km');
+define('DB_CN_RULES_IS_ACTIVE' , 'is_active');
 
 define('FORMAT_DATE' , 'Y-m-d');
 

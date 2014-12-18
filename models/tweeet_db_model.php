@@ -30,6 +30,30 @@ class TweetDBModel extends PDO {
         return $stmt->fetch();
     }
 
+    public function get_old_id($id) {
+        $sql = 'SELECT `' . DB_CN_TWEETS_ID . '` FROM `' . DB_TN_TWEETS . '` WHERE `' . DB_CN_TWEETS_RULES_ID . '` = :ID ORDER BY `' . DB_CN_TWEETS_ID . '` LIMIT 1';
+        $stmt = $this->prepare($sql);
+        $stmt->bindValue(":ID", $id);
+        $stmt->execute();
+        return $stmt->fetch() ?: -1;
+    }
+
+    public function load_rules() {
+        $rule_list = array();
+        foreach ($this->select_rules() as $row) {
+            $rule_list[] = new Rule($row);
+        }
+        return $rule_list;
+    }
+
+    public function select_rules() {
+        $sql = 'SELECT * FROM `' . DB_TN_RULES . '`';
+        $stmt = $this->prepare($sql);
+        $stmt->bindValue(":ID", $id);
+        $stmt->execute();
+        return $stmt->fetch_all();
+    }
+
 
     public function insert_tweets($statuses, $rule_id) {
         $sql = 'INSERT INTO `' . DB_TN_TWEETS . '` (`' . DB_CN_TWEETS_TWEET_ID . '`, `' . DB_CN_TWEETS_TWEET_USER_ID . '`, `' . DB_CN_TWEETS_TEXT . '`, `' . DB_CN_TWEETS_GEO_LAT . '`, `' . DB_CN_TWEETS_GEO_LON . '`, `' . DB_CN_TWEETS_RULES_ID .'`) VALUES ';
@@ -68,4 +92,10 @@ class TweetDBModel extends PDO {
         $stmt->bindValue(':RAD', $rule->radius);
         return $stmt->execute();
     }
+
+    public function update_rule_disactive($id) {
+        $sql = 'UPDATE `' . DB_TN_RULES . '` SET `' . DB_CN_RULES_IS_ACTIVE . '` = 0';
+        return $this->query($sql);
+    }
+
 }
