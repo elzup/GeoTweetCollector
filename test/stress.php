@@ -1,5 +1,4 @@
 <?php
-
 /* composer modules */
 require_once('./vendor/autoload.php');
 
@@ -15,16 +14,6 @@ require_once('./controllers/job_controller.php');
 require_once('./models/twitter_model.php');
 require_once('./models/tweeet_db_model.php');
 
-$app = new \Slim\Slim(array(
-    'debug'              => true,
-    'log.level'          => \Slim\Log::DEBUG,
-    'log.enabled'        => true,
-    'cookies.encrypt'    => true,    //cookie
-));
-
-// Web views
-$app->get('/', '\PageController:showIndex');
-$app->post('/job/submit',  '\JobController:submit');
-$app->get('/test',  '\JobController:ps_test');
-
-$app->run();
+$to = new TweetDBModel();
+$rule = new Rule();
+$to->

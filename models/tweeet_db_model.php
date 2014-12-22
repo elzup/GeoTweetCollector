@@ -2,6 +2,7 @@
 
 class TweetDBModel extends PDO {
     public function __construct() {
+        try {
         $this->engine = DB_ENGINE;
         $this->host = DB_HOST;
         $this->database = DB_NAME;
@@ -9,6 +10,10 @@ class TweetDBModel extends PDO {
         $this->pass = DB_PASSWORD;
         $dns = $this->engine . ':dbname=' . $this->database . ";host=" . $this->host;
         parent::__construct($dns, $this->user, $this->pass);
+        } catch (PDOException $e) {
+            echo $e->getMessage();
+        }
+
     }
 
     public function insert_tweets_wrap($statuses) {
@@ -83,14 +88,16 @@ class TweetDBModel extends PDO {
     }
 
     public function insert_rule(Rule $rule) {
-        $sql = 'INSERT INTO `' . DB_TN_RULES . '` (`' . DB_CN_RULES_LABEL . '`, `' . DB_CN_RULES_DATE . '`, `' . DB_CN_RULES_LAT . '`, `' . DB_CN_RULES_LON . '`, `' . DB_CN_RULES_RADIUS_KM . '`) VALUES (:LABEL, :DATE, :LAT, :LON, :RAD)';
+        $sql = 'INSERT INTO `' . DB_TN_RULES . '` (`' . DB_CN_RULES_LABEL . '`, `' . DB_CN_RULES_DATE . '`, `' . DB_CN_RULES_LAT . '`, `' . DB_CN_RULES_LON . '`, `' . DB_CN_RULES_RADIUS_KM . '`, `' . DB_CN_RULES_IS_ACTIVE . '`) VALUES (:LABEL, :DATE, :LAT, :LON, :RAD, :ISA)';
         $stmt = $this->prepare($sql);
         $stmt->bindValue(':LABEL', $rule->label);
         $stmt->bindValue(':DATE', $rule->getDateMysql());
         $stmt->bindValue(':LAT', $rule->lat);
         $stmt->bindValue(':LON', $rule->lon);
         $stmt->bindValue(':RAD', $rule->radius);
-        return $stmt->execute();
+        $stmt->bindValue(':ISA', '1');
+        $stmt->execute();
+//        return $this->lastInsertId();
     }
 
     public function update_rule_disactive($id) {
