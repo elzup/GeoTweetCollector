@@ -33,4 +33,8 @@ class Rule {
     public function getDateMysql() {
         return date(FORMAT_DATE, $this->date_timestamp);
     }
+
+    public function getDateStr() {
+        return date(FORMAT_DATE_STR, $this->date_timestamp);
+    }
 }

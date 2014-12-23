@@ -1,5 +1,7 @@
 <?php
 /** @var $title string */
+/** @var $rules Rule[] */
+
 $title = 'GEO Tweet Collector';
 
 $dates = array();
@@ -27,7 +29,7 @@ foreach (range(0, 7) as $i) {
 <section id="wrapper">
     <h1>GEO Tweet Collector</h1>
     <div class="pure-g">
-        <div class="pure-u-1-1">
+        <div class="pure-u-1-2">
         <form class="pure-form pure-form-stacked" method="POST" action="<?= URL_ROOT . 'job/submit' ?>">
             <fieldset>
                 <legend>ツイート収集フォーム</legend>
@@ -53,6 +55,22 @@ foreach (range(0, 7) as $i) {
                 <button type="submit" class="pure-button button-large pure-button-primary">集める</button>
             </fieldset>
         </form>
+        </div>
+        <div class="pure-u-1-2">
+        <table>
+            <tr>
+                <th>ラベル</th>
+                <th>Geocode</th>
+                <th>日付</th>
+            </tr>
+<?php foreach($rules as $rule) { ?>
+            <tr>
+                <td><?= h($rule->label) ?></td>
+                <td><a href="<?= get_googlemap_url($rule->lat, $rule->lon) ?>" target="_blank"><?= $rule->getGeocode() ?></a></td>
+                <td><?= $rule->getDateStr() ?></td>
+            </tr>
+<?php } ?>
+</table>
         </div>
     </div>
 </section>

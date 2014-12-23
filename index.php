@@ -15,6 +15,8 @@ require_once('./controllers/job_controller.php');
 require_once('./models/twitter_model.php');
 require_once('./models/tweeet_db_model.php');
 
+require_once('./helper/functions.php');
+
 $app = new \Slim\Slim(array(
     'debug'              => true,
     'log.level'          => \Slim\Log::DEBUG,

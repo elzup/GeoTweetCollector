@@ -43,20 +43,21 @@ class TweetDBModel extends PDO {
         return $stmt->fetch() ?: -1;
     }
 
-    public function load_rules() {
+    public function load_rules($limit = 10) {
         $rule_list = array();
-        foreach ($this->select_rules() as $row) {
+        foreach ($this->select_rules($limit) as $row) {
             $rule_list[] = new Rule($row);
         }
         return $rule_list;
     }
 
-    public function select_rules() {
+    public function select_rules($limit = 10) {
         $sql = 'SELECT * FROM `' . DB_TN_RULES . '`';
-        $stmt = $this->prepare($sql);
-        $stmt->bindValue(":ID", $id);
-        $stmt->execute();
-        return $stmt->fetch_all();
+        if (isset($limit)) {
+            $sql .= ' ORDER BY `' . DB_CN_RULES_ID . '` DESC LIMIT ' . $limit;
+        }
+        $res = $this->query($sql);
+        return $res;
     }
 
 
