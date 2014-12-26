@@ -31,6 +31,10 @@ case 2:
         sleep(60 * 16);
     }
     break;
+case 3:
+    $jc = new \JobController();
+    $jc->stream();
+    break;
 default:
     echo 'no args';
     break;
