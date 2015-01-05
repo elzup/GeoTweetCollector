@@ -1,5 +1,8 @@
 <?php
 
+ini_set('display_errors', '1');
+error_reporting(E_ALL);
+
 /* composer modules */
 require_once('./vendor/autoload.php');
 
@@ -25,8 +28,17 @@ $app = new \Slim\Slim(array(
 ));
 
 // Web views
+//$app->get('/', '\PageController:area');
 $app->get('/', '\PageController:showIndex');
 $app->post('/job/submit',  '\JobController:submit');
 $app->get('/test',  '\JobController:ps_test');
+$app->get('/ps/:id', function ($id) {
+    $jc = new \JobController();
+    while($jc->collectGeo($id)) {
+        echo '<pre>';
+        echo "let's sleep\n";
+        sleep(60 * 15);
+    }
+});
 
 $app->run();

@@ -28,7 +28,7 @@ class TweetDBModel extends PDO {
     }
 
     public function select_rule($id) {
-        $sql = 'SELECT * FROM `' . DB_TN_RULES . '` WHERE `' . DB_CN_RULES_ID . '` = :ID';
+        $sql = 'SELECT *, X(' . DB_CN_RULES_LATLON. ') as lat, Y(' . DB_CN_RULES_LATLON. ') as lon FROM `' . DB_TN_RULES . '` WHERE `' . DB_CN_RULES_ID . '` = :ID';
         $stmt = $this->prepare($sql);
         $stmt->bindValue(":ID", $id);
         $stmt->execute();
@@ -36,7 +36,7 @@ class TweetDBModel extends PDO {
     }
 
     public function get_old_id($id) {
-        $sql = 'SELECT `' . DB_CN_TWEETS_ID . '` FROM `' . DB_TN_TWEETS . '` WHERE `' . DB_CN_TWEETS_RULES_ID . '` = :ID ORDER BY `' . DB_CN_TWEETS_ID . '` LIMIT 1';
+        $sql = 'SELECT `' . DB_CN_TWEETS_TWEET_ID . '` FROM `' . DB_TN_TWEETS . '` WHERE `' . DB_CN_TWEETS_RULES_ID . '` = :ID ORDER BY `' . DB_CN_TWEETS_TWEET_ID . '` LIMIT 1';
         $stmt = $this->prepare($sql);
         $stmt->bindValue(":ID", $id);
         $stmt->execute();
@@ -52,7 +52,7 @@ class TweetDBModel extends PDO {
     }
 
     public function select_rules($limit = 10) {
-        $sql = 'SELECT * FROM `' . DB_TN_RULES . '`';
+        $sql = 'SELECT *, X(' . DB_CN_RULES_LATLON. ') as lat, Y(' . DB_CN_RULES_LATLON. ') as lon  FROM `' . DB_TN_RULES . '`';
         if (isset($limit)) {
             $sql .= ' ORDER BY `' . DB_CN_RULES_ID . '` DESC LIMIT ' . $limit;
         }
@@ -62,11 +62,14 @@ class TweetDBModel extends PDO {
 
 
     public function insert_tweets($statuses, $rule_id) {
-        $sql = 'INSERT INTO `' . DB_TN_TWEETS . '` (`' . DB_CN_TWEETS_TWEET_ID . '`, `' . DB_CN_TWEETS_TWEET_USER_ID . '`, `' . DB_CN_TWEETS_TEXT . '`, `' . DB_CN_TWEETS_GEO_LAT . '`, `' . DB_CN_TWEETS_GEO_LON . '`, `' . DB_CN_TWEETS_RULES_ID .'`) VALUES ';
+//        $sql = 'INSERT INTO `' . DB_TN_TWEETS . '` (`' . DB_CN_TWEETS_TWEET_ID . '`, `' . DB_CN_TWEETS_TWEET_USER_ID . '`, `' . DB_CN_TWEETS_TEXT . '`, `' . DB_CN_TWEETS_GEO_LAT . '`, `' . DB_CN_TWEETS_GEO_LON . '`, `' . DB_CN_TWEETS_RULES_ID .'`) VALUES ';
+        $sql = 'INSERT INTO `' . DB_TN_TWEETS . '` (`' . DB_CN_TWEETS_TWEET_ID . '`, `' . DB_CN_TWEETS_TWEET_USER_ID . '`, `' . DB_CN_TWEETS_TEXT . '`, `' . DB_CN_TWEETS_LATLNG .'`, `' . DB_CN_TWEETS_RULES_ID. '`, `' . DB_CN_TWEETS_TIMESTAMP. "`) VALUES ";
         $sql_values = array();
-        foreach (range(1, count($statuses)) as $i) {
+        foreach ($statuses as $i => $st) {
+            $i++;
 //            $sql_values[] = "(':TID$i', ':TUID$i', ':TEXT$i')";
-            $sql_values[] = "(':TID{$i}E', ':TUID{$i}E', ':TEXT{$i}E', ':LAT{$i}E', ':LON{$i}E', :RID{$i}E)";
+            $sql_values[] = "(:TID{$i}E, :TUID{$i}E, :TEXT{$i}E, GeomFromText('POINT(" . implode(' ', $st->geo->coordinates) . ")'), :RID{$i}E, :TIME{$i}E)";
+
         }
         $sql .= implode(',', $sql_values);
 
@@ -78,23 +81,27 @@ class TweetDBModel extends PDO {
             $stmt->bindValue(":TID{$i}E", $st->id);
             $stmt->bindValue(":TUID{$i}E", $st->user->id);
             $stmt->bindValue(":TEXT{$i}E", $st->text);
-            $stmt->bindValue(":LAT{$i}E", $st->geo->coordinates[0]);
-            $stmt->bindValue(":LON{$i}E", $st->geo->coordinates[1]);
             $stmt->bindValue(":RID{$i}E", $rule_id);
-            $pre_sql = str_replace(array(":TID{$i}E", ":TUID{$i}E", ":TEXT{$i}E", ":LAT{$i}E", ":LON{$i}E"), array($st->id, $st->user->id, $st->text, $st->geo->coordinates[0], $st->geo->coordinates[1]), $pre_sql);
+            $stmt->bindValue(":TIME{$i}E", date("Y-m-d H:i:s", strtotime($st->created_at)));
         }
-//        echo $sql . PHP_EOL;
-//        echo $pre_sql;
+        echo $sql . PHP_EOL;
         return $stmt->execute();
     }
 
+    public function load_tweets_recet($limit = 200) {
+        $sql = 'SELECT *, X(' . DB_CN_TWEETS_LATLNG . ') as lat, Y(' . DB_CN_TWEETS_LATLNG . ') as lon FROM `' . DB_TN_TWEETS . '`';
+        if (isset($limit)) {
+            $sql .= ' ORDER BY `' . DB_CN_TWEETS_ID . '` DESC LIMIT ' . $limit;
+        }
+        $res = $this->query($sql);
+        return $res->fetchAll();
+    }
+
     public function insert_rule(Rule $rule) {
-        $sql = 'INSERT INTO `' . DB_TN_RULES . '` (`' . DB_CN_RULES_LABEL . '`, `' . DB_CN_RULES_DATE . '`, `' . DB_CN_RULES_LAT . '`, `' . DB_CN_RULES_LON . '`, `' . DB_CN_RULES_RADIUS_KM . '`, `' . DB_CN_RULES_IS_ACTIVE . '`) VALUES (:LABEL, :DATE, :LAT, :LON, :RAD, :ISA)';
+        $sql = 'INSERT INTO `' . DB_TN_RULES . '` (`' . DB_CN_RULES_LABEL . '`, `' . DB_CN_RULES_DATE . '`, `' . DB_CN_RULES_LATLON . '`, `' . DB_CN_RULES_RADIUS_KM . '`, `' . DB_CN_RULES_IS_ACTIVE . "`) VALUES (:LABEL, :DATE, GeomFromText('POINT(" . $rule->lat . ' ' . $rule->lon . ")'), :RAD, :ISA)";
         $stmt = $this->prepare($sql);
         $stmt->bindValue(':LABEL', $rule->label);
         $stmt->bindValue(':DATE', $rule->getDateMysql());
-        $stmt->bindValue(':LAT', $rule->lat);
-        $stmt->bindValue(':LON', $rule->lon);
         $stmt->bindValue(':RAD', $rule->radius);
         $stmt->bindValue(':ISA', '1');
         $stmt->execute();

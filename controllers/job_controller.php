@@ -10,7 +10,7 @@ class JobController {
         $positions[2] = '35.658124';
         $positions[3] = '139.824828';
         // TODO:
-        $dao = new TweetDBModel();
+//        $dao = new TweetDBModel();
 
         $tokens = unserialize(AP_TWITTER_TOKENS);
         $token = $tokens[0];
@@ -29,8 +29,9 @@ class JobController {
         $post_parameters = array(
         );
         $get_parameters = array(
-            'locations' => implode(',', $positions),
+//            'locations' => implode(',', $positions),
 //            'locations' => '132.2,29.9,146.2,39.0,138.4,33.5,146.1,46.20',
+            'locations' => '-122.75,36.8,-121.75,37.8,-74,40,-73,41',
         );
         $oauth_parameters = array(
             'oauth_consumer_key' => $consumer_key,
@@ -55,8 +56,10 @@ class JobController {
 
         // 接続＆データ取得
         // $fp = stream_socket_client("ssl://stream.twitter.com:443/"); でもよい
+        $fp = fsockopen("ssl://stream.twitter.com", 443);
+        if ($fp) {
 //            fwrite($fp, "GET " . $url . ($get_parameters ? '?' . http_build_query($get_parameters) : '') . " HTTP/1.0\r\n"
-            fwrite($fp, "GET " . $kurl . " HTTP/1.0\r\n"
+            fwrite($fp, "GET " . $url . ($get_parameters ? '?' . http_build_query($get_parameters) : '') . " HTTP/1.0\r\n"
                 . "Host: stream.twitter.com\r\n"
                 . 'Authorization: OAuth ' . http_build_query($oauth_parameters, '', ',', PHP_QUERY_RFC3986) . "\r\n"
                 . "\r\n");
@@ -70,15 +73,16 @@ class JobController {
     public function collectGeo($rule_id) {
         $tm = new TwitterModel();
         $dao = new TweetDBModel();
-        echo $rule_id;
-        var_dump($dao);
         $rule = $dao->load_rule($rule_id);
-
+//        https://www.google.co.jp/maps/place/東京都/@35.673343,139.710388,11z/data=!3m1!4b1!4m2!3m1!1s0x605d1b87f02e57e7:0x2e01618b22571b89?hl=ja
         $min_id = $dao->get_old_id($rule_id);
-        $res = $tm->getGeoTweets($rule, $min_id);
+        echo $min_id[0];
+        $res = $tm->getGeoTweets($rule, $min_id[0]);
         $statuses = $res->statuses;
         $is_end = FALSE;
-        for ($i = 0; $i < 15; $i++) {
+        $dao->insert_tweets($statuses, $rule_id);
+        exit;
+        for ($i = 0; $i < 1; $i++) {
             $min_id = TwitterModel::get_min_id($res->statuses);
             $params = array(
                 'max_id' => $min_id - 1,
@@ -95,27 +99,6 @@ class JobController {
             $dao->insert_tweets($statuses, $rule_id);
         }
         return !$is_end;
-    }
-
-    public function testCollectGeo() {
-        $tm = new TwitterModel();
-        $dao = new TweetDBModel();
-        $r = new Rule();
-        $r->lat = '35.749412';
-        $r->lon = '139.805108';
-        $r->radius = '2';
-        $r->date_text = '2014-12-13';
-        $res = $tm->getGeoTweets($r);
-        $statuses = $res->statuses;
-        $min_id = TwitterModel::get_min_id($res->statuses);
-        $params = array(
-            'max_id' => $min_id - 1,
-        );
-        $res = $tm->continueRequest($params);
-        $statuses = array_merge($statuses, $res->statuses);
-        echo PHP_EOL;
-        echo count($statuses);
-        $dao->insert_tweets($statuses);
     }
 
     public function submit() {

@@ -26,9 +26,10 @@ class TwitterModel {
             'q' => '',
             'geocode' => $rule->getGeocode(),
             'until' => $rule->getDateMysql(),
-            'count' => 100,
+            'count' => 5,
+//            'count' => 100,
             'result_type' => 'recent',
-            'max_id' => $max_id,
+            'max_id' => (string)$max_id,
         );
         $this->url = $this->last_url = 'search/tweets';
         return $this->to->get($this->url, $this->params);

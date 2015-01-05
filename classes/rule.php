@@ -12,8 +12,8 @@ class Rule {
             return;
         }
         $this->label          = $obj[DB_CN_RULES_LABEL];
-        $this->lat            = $obj[DB_CN_RULES_LAT];
-        $this->lon            = $obj[DB_CN_RULES_LON];
+        $this->lat            = $obj['lat'];
+        $this->lon            = $obj['lon'];
         $this->radius         = $obj[DB_CN_RULES_RADIUS_KM];
         $this->date_timestamp = strtotime($obj[DB_CN_RULES_DATE]);
     }

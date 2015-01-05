@@ -28,7 +28,7 @@ case 2:
     }
     $jc = new \JobController();
     while($jc->collectGeo($id)) {
-        sleep(60 * 16);
+        sleep(60 * 15);
     }
     break;
 case 3:
