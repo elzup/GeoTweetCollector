@@ -76,32 +76,31 @@ class JobController {
         $rule = $dao->load_rule($rule_id);
 //        https://www.google.co.jp/maps/place/東京都/@35.673343,139.710388,11z/data=!3m1!4b1!4m2!3m1!1s0x605d1b87f02e57e7:0x2e01618b22571b89?hl=ja
         $min_id = $dao->get_old_id($rule_id);
-        $remain = $tm->get_limit_search();
-        $res = $tm->getGeoTweets($rule, $min_id[0]);
-        echo '<pre>';
-        $is_end = FALSE;
-        echo "min: {$min_id[0]}\n";
-        echo "remain: {$remain}\n";
+        $mi = $min_id[0] - 1;
 
-        $sum = count($res->statuses);
-        $dao->insert_tweets($res->statuses, $rule_id);
-        for ($i = 0; $i < $remain - 2; $i++) {
-            $min_id = TwitterModel::get_min_id($res->statuses);
-            echo "min: {$min_id}\n";
-            $params = array(
-                'max_id' => $min_id - 1,
-            );
-            $res = $tm->continueRequest($params);
-            if (count($res->statuses) == 0) {
-                $is_end = TRUE;
-                $dao->update_rule_disactive($rule_id);
-                break;
+        echo '<pre>';
+        for ($j = 0; $j < 11; $j++) {
+            $tm->change_to($j);
+            $remain = $tm->get_limit_search();
+            //        echo "min: {$mi}\n";
+            echo "remain: {$remain}\n";
+
+            $sum = 0;
+            $i = 0;
+            while ($i++ < $remain - 2) {
+                $res = $tm->getGeoTweets($rule, $mi);
+                if (($c = count($res->statuses)) == 0) {
+                    break;
+                }
+                $dao->insert_tweets($res->statuses, $rule_id);
+                $mi = TwitterModel::get_min_id($res->statuses) - 1;
+                $sum += $c;
+                //            echo "c{$i}: {$sum}\n";
+                //            echo "min: {$mi}\n";
             }
-            $dao->insert_tweets($res->statuses, $rule_id);
-            $sum += count($res->statuses);
-            echo "c{$i}: {$sum}\n";
+            echo "sum{$j}: {$sum}\n";
         }
-        return !$is_end;
+        return ;
     }
 
     public function submit() {

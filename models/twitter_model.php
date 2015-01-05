@@ -32,7 +32,7 @@ class TwitterModel {
             'until' => $rule->getDateMysql(),
             'count' => 100,
             'result_type' => 'recent',
-            'max_id' => $max_id - 1,
+            'max_id' => $max_id,
         );
         $this->url = 'search/tweets';
         return $this->to->get($this->url, $this->params);
