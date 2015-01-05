@@ -81,7 +81,7 @@ class TweetDBModel extends PDO {
             $stmt->bindValue(":TUID{$i}E", $st->user->id);
             $stmt->bindValue(":TEXT{$i}E", $st->text);
             $stmt->bindValue(":RID{$i}E", $rule_id);
-            $stmt->bindValue(":TIME{$i}E", date("Y-m-d H:i:s", strtotime($st->created_at)));
+            $stmt->bindValue(":TIME{$i}E", date("Y-m-d H:i:s", strtotime($st->created_at) - 60 * 60 * 9));
         }
         if (!$stmt->execute()) {
             echo '<pre>';

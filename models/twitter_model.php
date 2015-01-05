@@ -9,8 +9,12 @@ class TwitterModel {
     public $params;
 
     public function __construct() {
+        $this->change_to(0);
+    }
+
+    public function change_to($i) {
         $tokens = unserialize(AP_TWITTER_TOKENS);
-        $token = $tokens[0];
+        $token = $tokens[$i];
         try {
             $this->to = new TwistOAuth($token['CONSUMER_KEY'], $token['CONSUMER_SECRET'], $token['ACCESS_TOKEN'], $token['ACCESS_TOKEN_SCRET']);
         } catch (TwistException $e) {

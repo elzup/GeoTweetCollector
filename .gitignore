@@ -9,6 +9,9 @@ keys.php
 .htaccess
 php.ini
 
+test*
+test/
+
 # compiled
 *.css
 *.map
