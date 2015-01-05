@@ -26,12 +26,11 @@ class TwitterModel {
             'q' => '',
             'geocode' => $rule->getGeocode(),
             'until' => $rule->getDateMysql(),
-            'count' => 5,
-//            'count' => 100,
+            'count' => 100,
             'result_type' => 'recent',
-            'max_id' => (string)$max_id,
+            'max_id' => $max_id - 1,
         );
-        $this->url = $this->last_url = 'search/tweets';
+        $this->url = 'search/tweets';
         return $this->to->get($this->url, $this->params);
     }
 
@@ -42,6 +41,15 @@ class TwitterModel {
         $this->params = array_merge($this->params, $update_params);
 //        var_dump($this->params);
         return $this->to->get($this->url, $this->params);
+    }
+
+    public function get_limit_search() {
+        $this->params = array(
+            'resources' => 'search',
+        );
+        $this->url = 'application/rate_limit_status';
+        $res = $this->to->get($this->url, $this->params);
+        return ($res->resources->search->{"/search/tweets"}->remaining);
     }
 
     public static function get_min_id($statuses) {
@@ -55,4 +63,5 @@ class TwitterModel {
         }
         return $min;
     }
+
 }

@@ -76,14 +76,18 @@ class JobController {
         $rule = $dao->load_rule($rule_id);
 //        https://www.google.co.jp/maps/place/東京都/@35.673343,139.710388,11z/data=!3m1!4b1!4m2!3m1!1s0x605d1b87f02e57e7:0x2e01618b22571b89?hl=ja
         $min_id = $dao->get_old_id($rule_id);
-        echo $min_id[0];
+        $remain = $tm->get_limit_search();
         $res = $tm->getGeoTweets($rule, $min_id[0]);
-        $statuses = $res->statuses;
+        echo '<pre>';
         $is_end = FALSE;
-        $dao->insert_tweets($statuses, $rule_id);
-        exit;
-        for ($i = 0; $i < 1; $i++) {
+        echo "min: {$min_id[0]}\n";
+        echo "remain: {$remain}\n";
+
+        $sum = count($res->statuses);
+        $dao->insert_tweets($res->statuses, $rule_id);
+        for ($i = 0; $i < $remain - 2; $i++) {
             $min_id = TwitterModel::get_min_id($res->statuses);
+            echo "min: {$min_id}\n";
             $params = array(
                 'max_id' => $min_id - 1,
             );
@@ -93,10 +97,9 @@ class JobController {
                 $dao->update_rule_disactive($rule_id);
                 break;
             }
-            $statuses = array_merge($statuses, $res->statuses);
-        }
-        if (count($statuses)) {
-            $dao->insert_tweets($statuses, $rule_id);
+            $dao->insert_tweets($res->statuses, $rule_id);
+            $sum += count($res->statuses);
+            echo "c{$i}: {$sum}\n";
         }
         return !$is_end;
     }

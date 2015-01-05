@@ -60,7 +60,6 @@ class TweetDBModel extends PDO {
         return $res;
     }
 
-
     public function insert_tweets($statuses, $rule_id) {
 //        $sql = 'INSERT INTO `' . DB_TN_TWEETS . '` (`' . DB_CN_TWEETS_TWEET_ID . '`, `' . DB_CN_TWEETS_TWEET_USER_ID . '`, `' . DB_CN_TWEETS_TEXT . '`, `' . DB_CN_TWEETS_GEO_LAT . '`, `' . DB_CN_TWEETS_GEO_LON . '`, `' . DB_CN_TWEETS_RULES_ID .'`) VALUES ';
         $sql = 'INSERT INTO `' . DB_TN_TWEETS . '` (`' . DB_CN_TWEETS_TWEET_ID . '`, `' . DB_CN_TWEETS_TWEET_USER_ID . '`, `' . DB_CN_TWEETS_TEXT . '`, `' . DB_CN_TWEETS_LATLNG .'`, `' . DB_CN_TWEETS_RULES_ID. '`, `' . DB_CN_TWEETS_TIMESTAMP. "`) VALUES ";
@@ -84,8 +83,11 @@ class TweetDBModel extends PDO {
             $stmt->bindValue(":RID{$i}E", $rule_id);
             $stmt->bindValue(":TIME{$i}E", date("Y-m-d H:i:s", strtotime($st->created_at)));
         }
-        echo $sql . PHP_EOL;
-        return $stmt->execute();
+        if (!$stmt->execute()) {
+            echo '<pre>';
+            var_dump($stmt->errorInfo());
+            exit;
+        }
     }
 
     public function load_tweets_recet($limit = 200) {

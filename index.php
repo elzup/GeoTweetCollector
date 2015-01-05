@@ -33,12 +33,9 @@ $app->get('/', '\PageController:showIndex');
 $app->post('/job/submit',  '\JobController:submit');
 $app->get('/test',  '\JobController:ps_test');
 $app->get('/ps/:id', function ($id) {
+    ini_set('memory_limit', '1024M');
     $jc = new \JobController();
-    while($jc->collectGeo($id)) {
-        echo '<pre>';
-        echo "let's sleep\n";
-        sleep(60 * 15);
-    }
+    $jc->collectGeo($id);
 });
 
 $app->run();
