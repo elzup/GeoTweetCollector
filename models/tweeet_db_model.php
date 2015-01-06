@@ -100,6 +100,7 @@ class TweetDBModel extends PDO {
     }
 
     public function insert_rule(Rule $rule) {
+//        $sql = 'INSERT IGNORE INTO `' . DB_TN_RULES . '` (`' . DB_CN_RULES_LABEL . '`, `' . DB_CN_RULES_DATE . '`, `' . DB_CN_RULES_LATLON . '`, `' . DB_CN_RULES_RADIUS_KM . '`, `' . DB_CN_RULES_IS_ACTIVE . "`) VALUES (:LABEL, :DATE, GeomFromText('POINT(" . $rule->lat . ' ' . $rule->lon . ")'), :RAD, :ISA)";
         $sql = 'INSERT INTO `' . DB_TN_RULES . '` (`' . DB_CN_RULES_LABEL . '`, `' . DB_CN_RULES_DATE . '`, `' . DB_CN_RULES_LATLON . '`, `' . DB_CN_RULES_RADIUS_KM . '`, `' . DB_CN_RULES_IS_ACTIVE . "`) VALUES (:LABEL, :DATE, GeomFromText('POINT(" . $rule->lat . ' ' . $rule->lon . ")'), :RAD, :ISA)";
         $stmt = $this->prepare($sql);
         $stmt->bindValue(':LABEL', $rule->label);

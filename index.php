@@ -34,6 +34,7 @@ $app->post('/job/submit',  '\JobController:submit');
 $app->get('/test',  '\JobController:ps_test');
 $app->get('/ps/:id', function ($id) {
     ini_set('memory_limit', '1024M');
+    ini_set("max_execution_time",300);
     $jc = new \JobController();
     $jc->collectGeo($id);
 });
