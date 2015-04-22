@@ -90,8 +90,11 @@ class TweetDBModel extends PDO {
         }
     }
 
-    public function load_tweets_recet($limit = 200) {
+    public function load_tweets_recet($limit = 200, $since = NULL) {
         $sql = 'SELECT *, X(' . DB_CN_TWEETS_LATLNG . ') as lat, Y(' . DB_CN_TWEETS_LATLNG . ') as lon FROM `' . DB_TN_TWEETS . '`';
+        if (isset($since)) {
+            $sql .= ' WHERE ' . DB_CN_TWEETS_TIMESTAMP . ' < ' . $since;
+        }
         if (isset($limit)) {
             $sql .= ' ORDER BY `' . DB_CN_TWEETS_ID . '` DESC LIMIT ' . $limit;
         }

@@ -28,8 +28,12 @@ $app = new \Slim\Slim(array(
 ));
 
 // Web views
-//$app->get('/', '\PageController:area');
-$app->get('/', '\PageController:showIndex');
+$app->get('/', '\PageController:area');
+// $app->get('/', '\PageController:showIndex');
+$app->get('/t/:id', function ($id) use ($app) {
+    $p = new \PageController();
+    $p->areaTime($id);
+});
 $app->post('/job/submit',  '\JobController:submit');
 $app->get('/test',  '\JobController:ps_test');
 $app->get('/ps/:id', function ($id) {
