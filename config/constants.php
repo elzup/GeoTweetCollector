@@ -8,7 +8,7 @@ define('DB_CN_TWEETS_ID'            , 'id');
 define('DB_CN_TWEETS_TWEET_ID'      , 'tweet_id');
 define('DB_CN_TWEETS_TWEET_USER_ID' , 'tweet_user_id');
 define('DB_CN_TWEETS_TEXT'          , 'text');
-define('DB_CN_TWEETS_LATLNG'        , 'latlng');
+define('DB_CN_TWEETS_LATLNG'        , 'latlong');
 define('DB_CN_TWEETS_RULES_ID'      , 'rule_id');
 define('DB_CN_TWEETS_TIMESTAMP'     , 'timestamp');
 

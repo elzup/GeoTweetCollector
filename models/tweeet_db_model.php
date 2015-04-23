@@ -62,8 +62,12 @@ class TweetDBModel extends PDO {
 
     public function insert_tweets($statuses, $rule_id) {
 //        $sql = 'INSERT INTO `' . DB_TN_TWEETS . '` (`' . DB_CN_TWEETS_TWEET_ID . '`, `' . DB_CN_TWEETS_TWEET_USER_ID . '`, `' . DB_CN_TWEETS_TEXT . '`, `' . DB_CN_TWEETS_GEO_LAT . '`, `' . DB_CN_TWEETS_GEO_LON . '`, `' . DB_CN_TWEETS_RULES_ID .'`) VALUES ';
+        $statuses = array_filter($statuses, function($e) {
+            return isset($e->geo);
+        });
         $sql = 'INSERT INTO `' . DB_TN_TWEETS . '` (`' . DB_CN_TWEETS_TWEET_ID . '`, `' . DB_CN_TWEETS_TWEET_USER_ID . '`, `' . DB_CN_TWEETS_TEXT . '`, `' . DB_CN_TWEETS_LATLNG .'`, `' . DB_CN_TWEETS_RULES_ID. '`, `' . DB_CN_TWEETS_TIMESTAMP. "`) VALUES ";
         $sql_values = array();
+        ?><pre><?php
         foreach ($statuses as $i => $st) {
             $i++;
 //            $sql_values[] = "(':TID$i', ':TUID$i', ':TEXT$i')";
