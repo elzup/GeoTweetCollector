@@ -18,4 +18,11 @@ class PageController {
         $tweets = $dao->load_tweets_recet(200, date("Y-m-d {$time}:00:00"));
         require('./views/area.php');
     }
+
+    public function eventIndex() {
+        $dao = new ClusterModel();
+        $datas = $dao->get_values();
+        require('./views/event.php');
+    }
+
 }

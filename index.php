@@ -17,6 +17,7 @@ require_once('./controllers/page_controller.php');
 require_once('./controllers/job_controller.php');
 require_once('./models/twitter_model.php');
 require_once('./models/tweeet_db_model.php');
+require_once('./models/cluster_model.php');
 
 require_once('./helper/functions.php');
 
@@ -28,7 +29,8 @@ $app = new \Slim\Slim(array(
 ));
 
 // Web views
-$app->get('/', '\PageController:area');
+$app->get('/', '\PageController:eventIndex');
+// $app->get('/', '\PageController:areaIndex');
 // $app->get('/', '\PageController:showIndex');
 $app->get('/t/:id', function ($id) use ($app) {
     $p = new \PageController();

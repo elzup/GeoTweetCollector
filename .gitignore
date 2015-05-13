@@ -12,6 +12,8 @@ php.ini
 test*
 test/
 
+*.json
+
 # compiled
 *.css
 *.map
