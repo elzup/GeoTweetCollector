@@ -29,20 +29,9 @@ $app = new \Slim\Slim(array(
 ));
 
 // Web views
-$app->get('/', '\PageController:eventIndex');
-// $app->get('/', '\PageController:areaIndex');
-// $app->get('/', '\PageController:showIndex');
-$app->get('/t/:id', function ($id) use ($app) {
-    $p = new \PageController();
-    $p->areaTime($id);
+$app->get('/', function () {
+    $date = $_GET['d'];
+    $jc = new \PageController();
+    $jc->eventIndex($date);
 });
-$app->post('/job/submit',  '\JobController:submit');
-$app->get('/test',  '\JobController:ps_test');
-$app->get('/ps/:id', function ($id) {
-    ini_set('memory_limit', '1024M');
-    ini_set("max_execution_time",300);
-    $jc = new \JobController();
-    $jc->collectGeo($id);
-});
-
 $app->run();

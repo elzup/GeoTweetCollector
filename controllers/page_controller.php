@@ -19,8 +19,8 @@ class PageController {
         require('./views/area.php');
     }
 
-    public function eventIndex() {
-        $dao = new ClusterModel();
+    public function eventIndex($date = '2015-05-10') {
+        $dao = new ClusterModel($date);
         $datas = $dao->get_values();
         require('./views/event.php');
     }
