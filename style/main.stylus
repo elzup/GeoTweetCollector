@@ -13,18 +13,37 @@ header
 
 h3
   margin 0 30px
-.controller .tag-list 
+
+
+flex-list()
   display flex
   flex-direction row
   list-style-type none
 
+list-elem()
+  padding 3px 5px
+  margin 3px 5px
+  border-radius 3px
+
+.link-list
+  flex-list()
+  li
+    list-elem()
+    background blue
+    &.active
+      background red
+      a
+        color orange
+    a
+      color white
+
+.tag-list
+  flex-list()
   label
     input
       display none
     background gray
-    padding 3px 5px
-    margin 3px 5px
-    border-radius 3px
+    list-elem()
     &.selected
       background blue
     span

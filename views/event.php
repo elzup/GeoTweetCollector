@@ -6,27 +6,36 @@ $data = array();
 $p = 80000;
 $idlib = array();
 $idcollib = array();
-foreach($datas as $cid => $culster) {
-    $idlib[$cid] = $culster->tag;
+foreach($datas as $cid => $cluster) {
+    $idlib[$cid] = $cluster->tag;
     $col = getColorCode($cid, count($datas));
     $idcollib[$cid] = $col;
-    foreach ($culster->top_cluster as $p) {
-        $d = new stdclass();
-        $d->id = $cid;
-        $d->pos = array($p->lat, $p->lng);
-        $d->text = $p->text;
-        $d->timestamp = $p->timestamp;
+    foreach ($cluster->top_cluster as $p) {
+        $d = $p;
         $d->color = $col;
         $data[] = $d;
     }
+    $col2 = getColorCode($cid, count($datas), 5);
+    foreach ($cluster->other_clusters as $cl) {
+        foreach ($cl as $p) {
+            $d = $p;
+            $d->color = $col2;
+            $data[] = $d;
+        }
+    }
 }
 /** negapozi を 正規化 */
-$date_str = date('Y年m月d日 H時m分');
+$date_str = date('Y年m月d日', strtotime($_GET['d']));
+$date_list = [];
+for ($i = 0; $i < 6; $i ++) {
+    list($k, $v) = explode('_', date('Y年m月d日_Y-m-d', strtotime("2015-05-13 -{$i}day")));
+    $date_list[$k] = $v;
+}
 
-function getColorCode($id, $max) {
+function getColorCode($id, $max, $level = 1) {
     return implode('', array_map(function ($v) {
         return sprintf("%02s", dechex($v));
-    }, HSVtoRGB($id * 360 / $max + 1, 100, 100)));
+    }, HSVtoRGB($id * 360 / $max + 1, 100 / $level, 100)));
 }
 
 function HSVtoRGB($iH, $iS, $iV) {
@@ -96,14 +105,14 @@ var center = {lat: 35.6521438, lng: 139.7021483};
 //    var bounds = new google.maps.LatLngBounds();
     var pos, point = [];
     for (var i=0; i < data.length; i++) {
-        pos = new google.maps.LatLng(data[i].pos[1], data[i].pos[0]);
+        pos = new google.maps.LatLng(data[i].lat, data[i].lng);
         point.push({
             location : pos,
             weight : data[i].point //ヒートマップの重み付けに使用するデータを指定
         })
 //        bounds.extend(pos);
 
-        set_marker(data[i].color, data[i].pos[0], data[i].pos[1], map, infowindow, data[i].timestamp, data[i].text + "[" + data[i].timestamp + "]");
+        set_marker(data[i].color, data[i].lat, data[i].lng, map, infowindow, data[i].timestamp, data[i].text + "[" + data[i].timestamp + "]");
  
     }
 //    map.fitBounds(bounds); //全てのデータが画面に収まる様に表示を変更
@@ -156,6 +165,15 @@ $(function() {
       </div>
     </header>
     <div class="controller">
+    <h3><?= $date_str ?></h3>
+    <h3>日付</h3>
+    <ul class="link-list">
+    <?php foreach (array_reverse($date_list) as $k => $v) { ?>
+        <li class="<?= ($_GET['d'] == $v) ? 'active': ''?>">
+            <a href="./?d=<?=$v?>"><?= $k ?></a>
+        </li>
+    <?php } ?>
+    </ul>
     <h3>タグリスト</h3>
     <ul class="tag-list">
     <?php foreach ($idlib as $i => $tag_name) { ?>
