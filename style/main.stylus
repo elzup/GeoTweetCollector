@@ -2,11 +2,32 @@ html
   height 100%
 body
   height 100%
-  margin 0
+  width 100%
+  padding 0 20px
   padding 0
-  background black
+  background #45A1CF
   color white
 header
   padding-left 30px
-#map_canvas
-  height 50% !important
+
+
+h3
+  margin 0 30px
+.controller .tag-list 
+  display flex
+  flex-direction row
+  list-style-type none
+
+  label
+    input
+      display none
+    background gray
+    padding 3px 5px
+    margin 3px 5px
+    border-radius 3px
+    &.selected
+      background blue
+    span
+      font-size 50px
+      line-height 10px
+

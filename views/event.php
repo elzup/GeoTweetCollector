@@ -8,11 +8,8 @@ $idlib = array();
 $idcollib = array();
 foreach($datas as $cid => $culster) {
     $idlib[$cid] = $culster->tag;
-    echo $cid;
-    echo '<br />';
     $col = getColorCode($cid, count($datas));
-    echo '<br />';
-    echo $col;
+    $idcollib[$cid] = $col;
     foreach ($culster->top_cluster as $p) {
         $d = new stdclass();
         $d->id = $cid;
@@ -29,7 +26,7 @@ $date_str = date('Y年m月d日 H時m分');
 function getColorCode($id, $max) {
     return implode('', array_map(function ($v) {
         return sprintf("%02s", dechex($v));
-    }, HSVtoRGB($id * 360 / $max, 100, 100)));
+    }, HSVtoRGB($id * 360 / $max + 1, 100, 100)));
 }
 
 function HSVtoRGB($iH, $iS, $iV) {
@@ -77,6 +74,7 @@ function HSVtoRGB($iH, $iS, $iV) {
     <title>イベント検知システム</title>
 <link rel="stylesheet" href="style/main.css">
 <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?key=<?= GOOGLE_API_KEY ?>&sensor=TRUE&libraries=geometry,visualization"></script>
+<script type="text/javascript" src="./js/jquery-2.1.4.min.js"></script>
 <script type="text/javascript">
 var data = []; 
 data = <?php echo json_encode($data) ?>;
@@ -130,12 +128,6 @@ function set_marker(col, lat, lon, map, infowindow, time, text) {
         icon: pinImage,
         map: map
     });
-    google.maps.event.addListener(marker, 'mouseover', (function(marker, user_lock, k, j, time) {
-        return function() {
-            infowindow.setContent(text);
-            infowindow.open(map, marker);
-        }
-    })(marker, time));
 }
 
 function id_to_color(id, max) {
@@ -144,12 +136,17 @@ function id_to_color(id, max) {
     h = 360 * id / max;
     console.log(h);
     rgb = HSVtoRGB(h, 50, 100);
-    console.log(rgb);
-    console.log(rgb["r"]);
 //    return parseInt(rgb[0], 16) + parseInt(rgb[1], 16) + parseInt(rgb[2], 16);
     return ['ff0000', '00ff00', '0000ff', 'ffff00', 'ff00ff', '00ffff', 'ffffff', '888888', '000000'][id];
 }
 
+$(function() {
+
+    $(".tag-list label").click(function(e){
+        // 選択変更時に何かする
+        $(this).toggleClass('selected');
+    });
+});
 </script>
   </head>
   <body onload="initialize()">
@@ -158,6 +155,16 @@ function id_to_color(id, max) {
       <div class="control">
       </div>
     </header>
-    <div id="map_canvas" style="width:100%; height:80%"></div>
+    <div class="controller">
+    <h3>タグリスト</h3>
+    <ul class="tag-list">
+    <?php foreach ($idlib as $i => $tag_name) { ?>
+        <li>
+        <label class="selected"><input type="checkbox" name="tag" value="<?= $tag_name ?>" /><?= $tag_name ?><span style="color: #<?= $idcollib[$i]?>">■</span></label>
+        </li>
+    <?php } ?>
+    </ul>
+    </div>
+    <div id="map_canvas" style="width:80%; height:60%"></div>
   </body>
 </html>
