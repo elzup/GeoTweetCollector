@@ -1,31 +1,80 @@
 <?php
 /* @var $datas */
 
-echo '<pre>';
 $maptype = "ROADMAP";
 $data = array();
 $p = 80000;
 $idlib = array();
+$idcollib = array();
 foreach($datas as $cid => $culster) {
     $idlib[$cid] = $culster->tag;
+    echo $cid;
+    echo '<br />';
+    $col = getColorCode($cid, count($datas));
+    echo '<br />';
+    echo $col;
     foreach ($culster->top_cluster as $p) {
         $d = new stdclass();
         $d->id = $cid;
         $d->pos = array($p->lat, $p->lng);
         $d->text = $p->text;
         $d->timestamp = $p->timestamp;
+        $d->color = $col;
         $data[] = $d;
     }
 }
-var_dump($idlib);
 /** negapozi を 正規化 */
 $date_str = date('Y年m月d日 H時m分');
+
+function getColorCode($id, $max) {
+    return implode('', array_map(function ($v) {
+        return sprintf("%02s", dechex($v));
+    }, HSVtoRGB($id * 360 / $max, 100, 100)));
+}
+
+function HSVtoRGB($iH, $iS, $iV) {
+    if($iH < 0)   $iH = 0;   // Hue:
+    if($iH > 360) $iH = 360; //   0-360
+    if($iS < 0)   $iS = 0;   // Saturation:
+    if($iS > 100) $iS = 100; //   0-100
+    if($iV < 0)   $iV = 0;   // Lightness:
+    if($iV > 100) $iV = 100; //   0-100
+    $dS = $iS/100.0; // Saturation: 0.0-1.0
+    $dV = $iV/100.0; // Lightness:  0.0-1.0
+    $dC = $dV*$dS;   // Chroma:     0.0-1.0
+    $dH = $iH/60.0;  // H-Prime:    0.0-6.0
+    $dT = $dH;       // Temp variable
+    while($dT >= 2.0) $dT -= 2.0; // php modulus does not work with float
+    $dX = $dC*(1-abs($dT-1));     // as used in the Wikipedia link
+    switch($dH) {
+    case($dH >= 0.0 && $dH < 1.0):
+        $dR = $dC; $dG = $dX; $dB = 0.0; break;
+    case($dH >= 1.0 && $dH < 2.0):
+        $dR = $dX; $dG = $dC; $dB = 0.0; break;
+    case($dH >= 2.0 && $dH < 3.0):
+        $dR = 0.0; $dG = $dC; $dB = $dX; break;
+    case($dH >= 3.0 && $dH < 4.0):
+        $dR = 0.0; $dG = $dX; $dB = $dC; break;
+    case($dH >= 4.0 && $dH < 5.0):
+        $dR = $dX; $dG = 0.0; $dB = $dC; break;
+    case($dH >= 5.0 && $dH < 6.0):
+        $dR = $dC; $dG = 0.0; $dB = $dX; break;
+    default:
+        $dR = 0.0; $dG = 0.0; $dB = 0.0; break;
+    }
+    $dM  = $dV - $dC;
+    $dR += $dM; $dG += $dM; $dB += $dM;
+    $dR *= 255; $dG *= 255; $dB *= 255;
+    return [round($dR), round($dG), round($dB)];
+}
+
 ?>
 <!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <title>イベント検知システム</title>
 <link rel="stylesheet" href="style/main.css">
 <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?key=<?= GOOGLE_API_KEY ?>&sensor=TRUE&libraries=geometry,visualization"></script>
 <script type="text/javascript">
@@ -37,7 +86,7 @@ var map, infowindow;
 var center = {lat: 35.6521438, lng: 139.7021483};
   function initialize() {
     var mapOptions = {
-      zoom: 10,
+      zoom: 11,
       center: center,
       mapTypeId: google.maps.MapTypeId.TERRAIN
     };
@@ -56,8 +105,7 @@ var center = {lat: 35.6521438, lng: 139.7021483};
         })
 //        bounds.extend(pos);
 
-        var col = id_to_color(data[i].id, data[i].length);
-        set_marker(col, data[i].pos[0], data[i].pos[1], map, infowindow, data[i].timestamp, data[i].text + "[" + data[i].timestamp + "]");
+        set_marker(data[i].color, data[i].pos[0], data[i].pos[1], map, infowindow, data[i].timestamp, data[i].text + "[" + data[i].timestamp + "]");
  
     }
 //    map.fitBounds(bounds); //全てのデータが画面に収まる様に表示を変更
@@ -91,79 +139,25 @@ function set_marker(col, lat, lon, map, infowindow, time, text) {
 }
 
 function id_to_color(id, max) {
-    h = 360 * id / max;
-    rgb = HSVtoRGB(h, 50, 100);
-
     console.log(id);
-//    return '#ffffff';
+    console.log(max);
+    h = 360 * id / max;
+    console.log(h);
+    rgb = HSVtoRGB(h, 50, 100);
+    console.log(rgb);
+    console.log(rgb["r"]);
+//    return parseInt(rgb[0], 16) + parseInt(rgb[1], 16) + parseInt(rgb[2], 16);
     return ['ff0000', '00ff00', '0000ff', 'ffff00', 'ff00ff', '00ffff', 'ffffff', '888888', '000000'][id];
 }
-
-
-/**
- * HSV配列 を RGB配列 へ変換します
- *
- * @param   {Number}  h         hue値        ※ 0～360の数値
- * @param   {Number}  s         saturation値 ※ 0～255 の数値
- * @param   {Number}  v         value値      ※ 0～255 の数値
- * @return  {Object}  {r, g, b} ※ r/g/b は 0～255 の数値
- */
-function HSVtoRGB (h, s, v) {
-  var r, g, b; // 0..255
-
-  while (h < 0) {
-    h += 360;
-  }
-
-  h = h % 360;
-
-  // 特別な場合 saturation = 0
-  if (s == 0) {
-    // → RGB は V に等しい
-    v = Math.round(v);
-    return {'r': v, 'g': v, 'b': v};
-  }
-
-  s = s / 255;
-
-  var i = Math.floor(h / 60) % 6,
-      f = (h / 60) - i,
-      p = v * (1 - s),
-      q = v * (1 - f * s),
-      t = v * (1 - (1 - f) * s)
-
-  switch (i) {
-    case 0 :
-      r = v;  g = t;  b = p;  break;
-    case 1 :
-      r = q;  g = v;  b = p;  break;
-    case 2 :
-      r = p;  g = v;  b = t;  break;
-    case 3 :
-      r = p;  g = q;  b = v;  break;
-    case 4 :
-      r = t;  g = p;  b = v;  break;
-    case 5 :
-      r = v;  g = p;  b = q;  break;
-  }
-
-  return {'r': Math.round(r), 'g': Math.round(g), 'b': Math.round(b)};
-}
-
 
 </script>
   </head>
   <body onload="initialize()">
-<header>
-    <h1>エリアストレス in 東京都</h1>
-    <div class="control">
-        <div>
-        <p><?= $date_str ?> 現在の東京都エリアストレス</p>
-        </div>
-        <div>
-        </div>
-    </div>
-</header>
-    <div id="map_canvas" style="width:100%; height:100%"></div>
+    <header>
+      <h1>東京イベント検知システム</h1>
+      <div class="control">
+      </div>
+    </header>
+    <div id="map_canvas" style="width:100%; height:80%"></div>
   </body>
 </html>
